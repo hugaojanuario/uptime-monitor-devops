@@ -1,0 +1,165 @@
+basePath: /
+definitions:
+  models.CheckResponse:
+    properties:
+      checked_at:
+        example: "2026-07-20T01:17:58Z"
+        type: string
+      duration_ms:
+        example: 478
+        type: integer
+      error:
+        example: ""
+        type: string
+      id:
+        example: 84c142da-dd0f-4664-bd43-0e32ff1c5ef7
+        type: string
+      name:
+        example: google
+        type: string
+      status_code:
+        example: 200
+        type: integer
+      url:
+        example: https://www.google.com
+        type: string
+    type: object
+  models.CreateURLRequest:
+    properties:
+      name:
+        example: google
+        type: string
+      url:
+        example: https://www.google.com
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        example: url não encontrada
+        type: string
+    type: object
+  models.HealthResponse:
+    properties:
+      status:
+        example: ok
+        type: string
+    type: object
+  models.URL:
+    properties:
+      created_at:
+        example: "2026-07-20T01:16:23Z"
+        type: string
+      id:
+        example: 84c142da-dd0f-4664-bd43-0e32ff1c5ef7
+        type: string
+      name:
+        example: google
+        type: string
+      url:
+        example: https://www.google.com
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API para cadastrar domínios/urls e verificar o status http de cada
+    um. Cada verificação também é gravada no arquivo de resultados.
+  title: Uptime Monitor API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Retorna ok quando a api está no ar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.HealthResponse'
+      summary: Healthcheck
+      tags:
+      - health
+  /urls:
+    get:
+      description: Faz um GET em todas as urls cadastradas, retorna o status http
+        de cada uma e grava os resultados no arquivo de resultados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CheckResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Verifica todas as urls
+      tags:
+      - urls
+    post:
+      consumes:
+      - application/json
+      description: Cadastra uma url para ser monitorada
+      parameters:
+      - description: Dados da url
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateURLRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.URL'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Cadastra uma url
+      tags:
+      - urls
+  /urls/{id}:
+    get:
+      description: Faz um GET apenas na url do id informado, retorna o status http
+        e grava o resultado no arquivo de resultados
+      parameters:
+      - description: ID da url (uuid)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Verifica uma url
+      tags:
+      - urls
+swagger: "2.0"
