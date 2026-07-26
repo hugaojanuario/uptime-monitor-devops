@@ -55,6 +55,9 @@ resource "aws_instance" "app" {
   vpc_security_group_ids = [aws_security_group.app.id]
   key_name               = aws_key_pair.lab.key_name
 
+  user_data = file("${path.module}/user_data.sh")
+  user_data_replace_on_change = true
+
   tags = {
     Name    = "uptime-app"
     Project = "go-uptime-aws"
