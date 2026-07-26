@@ -1,5 +1,5 @@
 resource "aws_key_pair" "lab" {
-  key_name = "uptime-lab"
+  key_name   = "uptime-lab"
   public_key = file("~/.ssh/uptime-lab.pub")
 }
 
@@ -13,7 +13,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["187.34.95.155/32"]
+    cidr_blocks = ["187.34.95.165/32"]
   }
 
   ingress {
