@@ -13,5 +13,33 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: Validar docker-compose
+      - name: Validar sintaxe do docker-compose
         run: docker compose -f docker-compose.prod.yml config
+      
+      - name: Buildar Criar .env de teste
+        run: |
+          cat > .env <<EOF
+          DB_NAME=uptime
+          DB_USER=ci
+          DB_PASSWORD-ci-nao-e-secret
+          EOF
+
+      - name: Subir a stack
+        run: docker compose -f docker-compose.prod.yml up
+
+      - name: Esperar a API responder
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8080/health; then exit 0; fi
+            sleep 2
+          done
+          echo "API nao responder em 60s"
+          exit 1
+
+      - name: Logs (somente se algo falhou)
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml logs
+
+      - name: Derrubar tudo
+        if: always()
+        run: docker compose -f docker-compose.prod.yml down -v
