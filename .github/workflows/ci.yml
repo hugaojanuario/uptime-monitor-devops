@@ -21,11 +21,11 @@ jobs:
           cat > .env <<EOF
           DB_NAME=uptime
           DB_USER=ci
-          DB_PASSWORD-ci-nao-e-secret
+          DB_PASSWORD=ci-nao-e-secret
           EOF
 
       - name: Subir a stack
-        run: docker compose -f docker-compose.prod.yml up
+        run: docker compose -f docker-compose.prod.yml up -d
 
       - name: Esperar a API responder
         run: |
