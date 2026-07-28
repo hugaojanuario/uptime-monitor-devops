@@ -1,11 +1,11 @@
 services:
   uptime-monitor:
-    image: devhugojanuario/uptime-monitor:v1
+    image: ${APP_IMAGE:-devhugojanuario/uptime-monitor:v1}
     environment:
       - PORT=${PORT:-8080}
       - DB_PORT=5432
       - DB_HOST=postgres
-      - DB_NAME=${DB_NAME:-uptime_monitor}
+      - DB_NAME=${DB_NAME:-uptime}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_SSLMODE=disable

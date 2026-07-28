@@ -8,15 +8,20 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      APP_IMAGE: uptime-monitor:${{ github.sha }}
 
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
+      - name: Buildar imagem do commit
+        run: docker build -t "$APP_IMAGE" .
+
       - name: Validar sintaxe do docker-compose
         run: docker compose -f docker-compose.prod.yml config
       
-      - name: Buildar Criar .env de teste
+      - name: Criar .env de teste
         run: |
           cat > .env <<EOF
           DB_NAME=uptime
