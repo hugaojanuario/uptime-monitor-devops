@@ -48,7 +48,7 @@ jobs:
           EOF
 
       - name: Subir a stack
-        run: docker compose -f docker-compose.prod.yml up -d
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -U "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin && docker compose -f docker-compose.prod.yml up -d
 
       - name: Esperar a API responder
         run: |
