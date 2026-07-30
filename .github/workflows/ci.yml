@@ -32,8 +32,8 @@ jobs:
           context: .
           push: true
           tags: |
-            devhugojanuario/uptime-monitor:latest
-            devhugojanuario/uptime-monitor: ${{ github.sha }}
+            devhugojanuario/uptime-monitor:v1
+            devhugojanuario/uptime-monitor:v1
 
       - name: Validar sintaxe do docker-compose
         run: docker compose -f docker-compose.prod.yml config
