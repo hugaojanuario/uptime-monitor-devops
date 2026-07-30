@@ -1,6 +1,6 @@
 services:
   uptime-monitor:
-    image: ${APP_IMAGE:-devhugojanuario/uptime-monitor:v1}
+    image: ${APP_IMAGE:-devhugojanuario/uptime-monitor:latest}
     environment:
       - PORT=${PORT:-8080}
       - DB_PORT=5432
