@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26.5-alpine3.24 AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o uptime-monitor ./cmd/api
 
-FROM alpine:latest
+FROM alpine:3.24.1
 
 RUN apk add --no-cache ca-certificates
 
