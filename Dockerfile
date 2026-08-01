@@ -1,3 +1,5 @@
+
+##alinhando o alpine do golang com o FROM alpine...
 FROM golang:1.26.5-alpine3.24 AS builder
 
 WORKDIR /app
