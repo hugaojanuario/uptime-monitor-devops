@@ -27,8 +27,6 @@ services:
       POSTGRES_DB: ${DB_NAME:-uptime}
       TZ: ${TZ:-America/Sao_Paulo}
       PGTZ: ${TZ:-America/Sao_Paulo}
-    ports:
-      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

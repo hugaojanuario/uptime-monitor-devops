@@ -16,7 +16,6 @@ type Config struct {
 	DB_USER       string
 	DB_PASSWORD   string
 	DB_SSLMODE    string
-	RESULTS_FILE  string
 	CHECK_TIMEOUT time.Duration
 	TZ            string
 }
@@ -29,11 +28,6 @@ func LoadDotEnv() *Config {
 	checkTimeout, _ := time.ParseDuration(os.Getenv("CHECK_TIMEOUT"))
 	if checkTimeout == 0 {
 		checkTimeout = 10 * time.Second
-	}
-
-	resultsFile := os.Getenv("RESULTS_FILE")
-	if resultsFile == "" {
-		resultsFile = "results.txt"
 	}
 
 	port := os.Getenv("PORT")
@@ -54,7 +48,6 @@ func LoadDotEnv() *Config {
 		DB_USER:       os.Getenv("DB_USER"),
 		DB_PASSWORD:   os.Getenv("DB_PASSWORD"),
 		DB_SSLMODE:    os.Getenv("DB_SSLMODE"),
-		RESULTS_FILE:  resultsFile,
 		CHECK_TIMEOUT: checkTimeout,
 		TZ:            tz,
 	}

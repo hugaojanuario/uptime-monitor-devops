@@ -11,6 +11,7 @@ import (
 	"time"
 	_ "time/tzdata" // base de timezones embutida no binário
 
+	"github.com/hugaojanuario/uptime-monitor-devops/db"
 	"github.com/hugaojanuario/uptime-monitor-devops/internal/healthcheck"
 	"github.com/hugaojanuario/uptime-monitor-devops/internal/http/handler"
 	"github.com/hugaojanuario/uptime-monitor-devops/internal/http/router"
@@ -36,7 +37,7 @@ func main() {
 	}
 	time.Local = loc
 
-	db, err := database.Conn(database.Config{
+	conn, err := database.Conn(database.Config{
 		DB_HOST:     cfg.DB_HOST,
 		DB_PORT:     cfg.DB_PORT,
 		DB_USER:     cfg.DB_USER,
@@ -48,13 +49,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer conn.Close()
+
+	if err := database.Migrate(conn, db.Migrations, "migrations"); err != nil {
+		log.Fatal(err)
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	checker := healthcheck.NewChecker(cfg.CHECK_TIMEOUT, cfg.RESULTS_FILE)
-	repo := repository.NewRepository(db)
+	checker := healthcheck.NewChecker(cfg.CHECK_TIMEOUT)
+	repo := repository.NewRepository(conn)
 	serv := services.NewService(repo, checker)
 	url := handler.NewURLController(serv)
 	router := router.SetupRouter(url)
@@ -72,7 +77,7 @@ func main() {
 			log.Fatalf("erro no servidor: %v", err)
 		}
 	}()
-	log.Printf("Uptime Monitor ouvindo na porta %s (resultados em %s)", cfg.PORT, cfg.RESULTS_FILE)
+	log.Printf("Uptime Monitor ouvindo na porta %s", cfg.PORT)
 
 	<-ctx.Done()
 	log.Println("desligando servidor...")

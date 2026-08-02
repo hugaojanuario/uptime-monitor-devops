@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -13,19 +12,16 @@ import (
 )
 
 type Checker struct {
-	client      *http.Client
-	resultsFile string
-	mu          sync.Mutex
+	client *http.Client
 }
 
-func NewChecker(timeout time.Duration, resultsFile string) *Checker {
+func NewChecker(timeout time.Duration) *Checker {
 	return &Checker{
-		client:      &http.Client{Timeout: timeout},
-		resultsFile: resultsFile,
+		client: &http.Client{Timeout: timeout},
 	}
 }
 
-// Check faz um GET na url e grava o retorno no arquivo de resultados.
+// Check faz um GET na url e emite o retorno no log.
 func (c *Checker) Check(ctx context.Context, url models.URL) models.CheckResponse {
 	result := models.CheckResponse{
 		ID:        url.ID,
@@ -49,9 +45,7 @@ func (c *Checker) Check(ctx context.Context, url models.URL) models.CheckRespons
 	}
 	result.DurationMs = time.Since(start).Milliseconds()
 
-	if err := c.writeResult(result); err != nil {
-		log.Printf("[checker] erro ao gravar o resultado em %s: %v", c.resultsFile, err)
-	}
+	logResult(result)
 
 	return result
 }
@@ -85,27 +79,14 @@ func (c *Checker) CheckAll(ctx context.Context, urls []models.URL) []models.Chec
 	return results
 }
 
-func (c *Checker) writeResult(result models.CheckResponse) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	file, err := os.OpenFile(c.resultsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		return fmt.Errorf("erro ao abrir o arquivo de resultados: %w", err)
-	}
-	defer file.Close()
-
+// logResult emite o resultado do check no log do processo. Quem coleta, roteia
+// e retém esse log é a plataforma, não a aplicação.
+func logResult(result models.CheckResponse) {
 	status := fmt.Sprintf("%d", result.StatusCode)
 	if result.Error != "" {
 		status = "ERROR: " + result.Error
 	}
 
-	line := fmt.Sprintf("%s\tid=%s\turl=%s\tstatus=%s\tduration=%dms\n",
-		result.CheckedAt.Format(time.RFC3339), result.ID, result.Address, status, result.DurationMs)
-
-	if _, err := file.WriteString(line); err != nil {
-		return fmt.Errorf("erro ao gravar o resultado: %w", err)
-	}
-
-	return nil
+	log.Printf("[checker] id=%s url=%s status=%s duration=%dms",
+		result.ID, result.Address, status, result.DurationMs)
 }
